@@ -14,7 +14,7 @@ type User struct {
 	Email     string    `json:"email" valid:"required,email" gorm:"uniqueIndex"`
 	Password  string    `json:"password" valid:"required,minstringlength(6)"`
 	Role      string    `json:"role" valid:"required"`
-	Balance   string    `json:"balance"`
+	Balance   int       `json:"balance"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -34,10 +34,9 @@ func main() {
 
 	// routing
 	// user
-	router.POST("/register", userController.RegisterUser)
-	router.POST("/login", userController.Login)
-	router.PUT("/update-account", middleware.AuthMiddleware(), userController.UpdateUser)
-	router.DELETE("/delete-account", middleware.AuthMiddleware(), userController.DeleteUser)
+	router.POST("users/register", userController.RegisterUser)
+	router.POST("users/login", userController.Login)
+	router.POST("users/topup", middleware.AuthMiddleware(), userController.TopUpSaldo)
 
 	router.Run()
 

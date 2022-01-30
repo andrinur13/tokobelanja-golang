@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"tokobelanja-golang/helper"
 	"tokobelanja-golang/middleware"
@@ -119,6 +120,44 @@ func (h *userController) Login(c *gin.Context) {
 	})
 	c.JSON(http.StatusOK, response)
 	return
+}
+
+func (h *userController) TopUpSaldo(c *gin.Context) {
+	var input input.TopUpSaldoInput
+	currentUser := c.MustGet("currentUser").(int)
+
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		// errors := helper.FormatValidationError(err)
+		errorMessages := gin.H{
+			"errors": err.Error(),
+		}
+
+		response := helper.APIResponse("failed", errorMessages)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	userTopup, err := h.userService.TopUp(input.Balance, currentUser)
+
+	if err != nil {
+		// errorMessages := helper.FormatValidationError(err)
+		response := helper.APIResponse("failed", gin.H{
+			"errors": err.Error(),
+		})
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	response := helper.APIResponse("ok", gin.H{
+		"body": gin.H{
+			"message": fmt.Sprintf("Your balance has been successfully updated to Rp. %d", userTopup.Balance),
+		},
+	})
+	c.JSON(http.StatusOK, response)
+	return
+
 }
 
 func (h *userController) UpdateUser(c *gin.Context) {

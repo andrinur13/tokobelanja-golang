@@ -15,3 +15,7 @@ type UpdateUserInput struct {
 	FullName string `json:"full_name"`
 	Email    string `json:"email"`
 }
+
+type TopUpSaldoInput struct {
+	Balance int `json:"balance"`
+}

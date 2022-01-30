@@ -12,6 +12,7 @@ import (
 type UserService interface {
 	CreateUser(userInput input.RegisterUserInput) (entity.User, error)
 	GetUserByEmail(email string) (entity.User, error)
+	TopUp(saldo int, IDUser int) (entity.User, error)
 	UpdateUser(ID int, input input.UpdateUserInput) (entity.User, error)
 	GetUserByID(ID int) (entity.User, error)
 	DeleteUser(ID int) (entity.User, error)
@@ -30,6 +31,7 @@ func (s *userService) CreateUser(input input.RegisterUserInput) (entity.User, er
 	newUser.Email = input.Email
 	newUser.FullName = input.FullName
 	newUser.Role = "customer"
+	newUser.Balance = 0
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 
@@ -66,6 +68,28 @@ func (s *userService) GetUserByEmail(email string) (entity.User, error) {
 	}
 
 	return userResult, nil
+}
+
+func (s *userService) TopUp(saldo int, IDUser int) (entity.User, error) {
+	userResult, err := s.userRepository.GetByID(IDUser)
+
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	if userResult.ID == 0 {
+		return entity.User{}, errors.New("user not found!")
+	}
+
+	saldoTerkini := userResult.Balance + saldo
+
+	updated, err := s.userRepository.Update(IDUser, entity.User{Balance: saldoTerkini})
+
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	return updated, nil
 }
 
 func (s *userService) GetUserByID(ID int) (entity.User, error) {
