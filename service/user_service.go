@@ -16,6 +16,7 @@ type UserService interface {
 	UpdateUser(ID int, input input.UpdateUserInput) (entity.User, error)
 	GetUserByID(ID int) (entity.User, error)
 	DeleteUser(ID int) (entity.User, error)
+	CheckUserAdmin(ID int) (bool, error)
 }
 
 type userService struct {
@@ -151,4 +152,18 @@ func (s *userService) DeleteUser(ID int) (entity.User, error) {
 
 	return entity.User{}, nil
 
+}
+
+func (s *userService) CheckUserAdmin(ID int) (bool, error) {
+	userdata, err := s.GetUserByID(ID)
+
+	if err != nil {
+		return false, err
+	}
+
+	if userdata.Role != "admin" {
+		return false, nil
+	}
+
+	return true, nil
 }

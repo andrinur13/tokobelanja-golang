@@ -26,6 +26,11 @@ func (s *transactionHistoryService) CreateTransaction(transactionInput input.Inp
 	newTransactionHistory.ProductID = transactionInput.ProductID
 	newTransactionHistory.Quantity = transactionInput.Quantity
 
+	// nunggu endpoint product
+	// query user
+	// pastikan balance tersedia
+	// store data ke transactions history
+
 	transactionCreated, err := s.transactionHistoryRepository.Save(newTransactionHistory)
 
 	if err != nil {
