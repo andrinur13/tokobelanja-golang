@@ -24,13 +24,15 @@ func (h *transactionHistoryController) NewTransaction(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&input)
 
+	currentUser := c.MustGet("currentUser").(int)
+
 	if err != nil {
 		resp := helper.APIResponse("error", err)
 		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
 
-	newTransaction, err := h.transactionHistoryService.CreateTransaction(input)
+	newTransaction, err := h.transactionHistoryService.CreateTransaction(input, currentUser)
 
 	if err != nil {
 		resp := helper.APIResponse("error", err)

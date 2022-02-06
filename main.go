@@ -23,12 +23,16 @@ func main() {
 
 	// repository
 	userRepository := repository.NewUserRepository(db)
+	transactionRepository := repository.NewTransactionHistoryRepository(db)
+	productRepository := repository.NewProductRepository(db)
 
 	// service
 	userService := service.NewUserService(userRepository)
+	transactionService := service.NewTransactionHistoryService(transactionRepository, productRepository, userRepository)
 
 	// controller
 	userController := controller.NewUserController(userService)
+	transactionController := controller.NewTransactionHistoryController(transactionService, userService)
 
 	router := gin.Default()
 
@@ -37,6 +41,9 @@ func main() {
 	router.POST("users/register", userController.RegisterUser)
 	router.POST("users/login", userController.Login)
 	router.POST("users/topup", middleware.AuthMiddleware(), userController.TopUpSaldo)
+
+	// transaction
+	router.POST("transactions", middleware.AuthMiddleware(), transactionController.NewTransaction)
 
 	router.Run()
 
