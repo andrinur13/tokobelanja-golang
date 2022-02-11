@@ -28,7 +28,7 @@ func (h *userController) RegisterUser(c *gin.Context) {
 
 	if err != nil {
 		error_message := gin.H{
-			"error": helper.FormatValidationError(err),
+			"error": err.Error(),
 		}
 
 		resp := helper.APIResponse("error", error_message)
@@ -69,9 +69,8 @@ func (h *userController) Login(c *gin.Context) {
 	err := c.ShouldBindJSON(&input)
 
 	if err != nil {
-		errors := helper.FormatValidationError(err)
 		errorMessages := gin.H{
-			"errors": errors,
+			"errors": err.Error(),
 		}
 
 		response := helper.APIResponse("failed", errorMessages)
@@ -84,9 +83,8 @@ func (h *userController) Login(c *gin.Context) {
 	user, err := h.userService.GetUserByEmail(input.Email)
 
 	if err != nil {
-		errors := helper.FormatValidationError(err)
 		errorMessages := gin.H{
-			"errors": errors,
+			"errors": err.Error(),
 		}
 
 		response := helper.APIResponse("failed", errorMessages)
