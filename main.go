@@ -25,14 +25,17 @@ func main() {
 	userRepository := repository.NewUserRepository(db)
 	transactionRepository := repository.NewTransactionHistoryRepository(db)
 	productRepository := repository.NewProductRepository(db)
+	categoriesRepository := repository.NewCategoryRepository(db)
 
 	// service
 	userService := service.NewUserService(userRepository)
 	transactionService := service.NewTransactionHistoryService(transactionRepository, productRepository, userRepository)
+	categoriesService := service.NewCategoryService(categoriesRepository)
 
 	// controller
 	userController := controller.NewUserController(userService)
 	transactionController := controller.NewTransactionHistoryController(transactionService, userService)
+	categoriesController := controller.NewCategoryController(categoriesService, userService)
 
 	router := gin.Default()
 
@@ -45,6 +48,11 @@ func main() {
 	// transaction
 	router.POST("transactions", middleware.AuthMiddleware(), transactionController.NewTransaction)
 	router.POST("transactions/my-transactions", middleware.AuthMiddleware(), transactionController.GetMyTransaction)
+
+	// categories
+	router.POST("categories", middleware.AuthMiddleware(), categoriesController.CreateCategory)
+	router.GET("categories", middleware.AuthMiddleware(), categoriesController.GetAllCategory)
+	router.PATCH("categories/:id", middleware.AuthMiddleware(), categoriesController.UpdateCategory)
 
 	router.Run()
 

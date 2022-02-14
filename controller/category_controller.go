@@ -71,8 +71,10 @@ func (h *categoryController) UpdateCategory(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(int)
 
 	var inputUpdate input.UpdateCategory
+	var IDInput input.IDCategory
 
 	err := c.ShouldBindJSON(&inputUpdate)
+	err = c.ShouldBindUri(&IDInput)
 
 	if err != nil {
 		response := helper.APIResponse("failed", gin.H{
@@ -90,7 +92,7 @@ func (h *categoryController) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	_, err = h.categoryService.UpdateCategory(currentUser, inputUpdate)
+	_, err = h.categoryService.UpdateCategory(IDInput.ID, inputUpdate)
 
 	if err != nil {
 		// errorMessages := helper.FormatValidationError(err)
