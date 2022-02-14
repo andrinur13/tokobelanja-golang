@@ -44,6 +44,7 @@ func main() {
 
 	// transaction
 	router.POST("transactions", middleware.AuthMiddleware(), transactionController.NewTransaction)
+	router.POST("transactions/my-transactions", middleware.AuthMiddleware(), transactionController.GetMyTransaction)
 
 	router.Run()
 

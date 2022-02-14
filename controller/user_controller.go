@@ -149,9 +149,7 @@ func (h *userController) TopUpSaldo(c *gin.Context) {
 	}
 
 	response := helper.APIResponse("ok", gin.H{
-		"body": gin.H{
-			"message": fmt.Sprintf("Your balance has been successfully updated to Rp. %d", userTopup.Balance),
-		},
+		"message": fmt.Sprintf("Your balance has been successfully updated to Rp. %d", userTopup.Balance),
 	})
 	c.JSON(http.StatusOK, response)
 	return

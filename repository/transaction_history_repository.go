@@ -37,5 +37,5 @@ func (r *transactionHistoryRepository) Save(input entity.TransactionHistory) (en
 		return entity.TransactionHistory{}, err
 	}
 
-	return entity.TransactionHistory{}, nil
+	return input, nil
 }

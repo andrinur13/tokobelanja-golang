@@ -63,6 +63,7 @@ func (s *transactionHistoryService) CreateTransaction(transactionInput input.Inp
 	// pastikan balance tersedia
 	buyAmount := product.Price * transactionInput.Quantity
 	newTransactionHistory.TotalPrice = buyAmount
+	newTransactionHistory.UserID = IDUser
 
 	// kurangi stock
 	productUpdate := entity.Product{
@@ -82,6 +83,8 @@ func (s *transactionHistoryService) CreateTransaction(transactionInput input.Inp
 	if err != nil {
 		return entity.TransactionHistory{}, err
 	}
+
+	_, err = s.userRepository.UpdateSaldo(IDUser, buyAmount)
 
 	if transactionCreated.ID == 0 {
 		return entity.TransactionHistory{}, err

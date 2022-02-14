@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"tokobelanja-golang/model/entity"
 
 	"gorm.io/gorm"
@@ -13,6 +14,7 @@ type UserRepository interface {
 	GetByID(ID int) (entity.User, error)
 	Update(ID int, user entity.User) (entity.User, error)
 	Delete(ID int) (bool, error)
+	UpdateSaldo(IDUser int, saldo int) (entity.User, error)
 }
 
 type userRepository struct {
@@ -91,4 +93,27 @@ func (r *userRepository) Delete(ID int) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (r *userRepository) UpdateSaldo(IDUser int, saldo int) (entity.User, error) {
+	userQuery := entity.User{}
+
+	err := r.db.Where("id = ?", IDUser).Find(&userQuery).Error
+
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	saldoSementara := userQuery.Balance - saldo
+
+	err = r.db.Where("id = ?", IDUser).Update("balance", saldoSementara).Error
+
+	if err != nil {
+		return entity.User{}, err
+	}
+	fmt.Println("update saldo")
+	fmt.Println(saldoSementara)
+
+	return userQuery, nil
+
 }

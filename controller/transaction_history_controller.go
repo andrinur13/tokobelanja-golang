@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"tokobelanja-golang/helper"
 	"tokobelanja-golang/model/input"
@@ -27,7 +28,7 @@ func (h *transactionHistoryController) NewTransaction(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(int)
 
 	if err != nil {
-		resp := helper.APIResponse("error", err)
+		resp := helper.APIResponse("error", err.Error())
 		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
@@ -35,10 +36,12 @@ func (h *transactionHistoryController) NewTransaction(c *gin.Context) {
 	newTransaction, err := h.transactionHistoryService.CreateTransaction(input, currentUser)
 
 	if err != nil {
-		resp := helper.APIResponse("error", err)
+		resp := helper.APIResponse("error", err.Error())
 		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
+
+	fmt.Println(newTransaction)
 
 	billResponse := response.NewTransactionBillResponse{
 		TotalPrice:   newTransaction.TotalPrice,
