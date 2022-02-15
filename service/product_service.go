@@ -28,6 +28,7 @@ func (s *productService) CreateProduct(input input.CreateProduct) (entity.Produc
 	newProduct.Title = input.Title
 	newProduct.Price = input.Price
 	newProduct.Stock = input.Stock
+	newProduct.CategoryID = input.CategoryID
 
 	created, err := s.productRepository.Save(newProduct)
 
@@ -69,6 +70,7 @@ func (s *productService) UpdateProduct(ID int, input input.UpdateProduct) (entit
 	}
 
 	updated := entity.Product{
+		ID:    ID,
 		Title: input.Title,
 		Price: input.Price,
 		Stock: input.Stock,

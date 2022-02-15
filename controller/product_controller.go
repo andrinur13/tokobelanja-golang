@@ -73,8 +73,10 @@ func (h *productController) UpdateProduct(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(int)
 
 	var inputUpdate input.UpdateProduct
+	var IDInput input.IDProduct
 
 	err := c.ShouldBindJSON(&inputUpdate)
+	err = c.ShouldBindUri(&IDInput)
 
 	if err != nil {
 		response := helper.APIResponse("failed", gin.H{
@@ -92,7 +94,7 @@ func (h *productController) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	_, err = h.productService.UpdateProduct(currentUser, inputUpdate)
+	_, err = h.productService.UpdateProduct(IDInput.ID, inputUpdate)
 
 	if err != nil {
 		// errorMessages := helper.FormatValidationError(err)
@@ -103,7 +105,7 @@ func (h *productController) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	productUpdated, err := h.productService.GetProductByID(currentUser)
+	productUpdated, err := h.productService.GetProductByID(IDInput.ID)
 
 	if err != nil {
 		response := helper.APIResponse("failed", gin.H{
@@ -165,7 +167,7 @@ func (h *productController) DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	message := "Category deleted"
+	message := "products deleted"
 
 	response := helper.APIResponse("ok", message)
 	c.JSON(http.StatusOK, response)

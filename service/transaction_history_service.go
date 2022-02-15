@@ -4,12 +4,14 @@ import (
 	"errors"
 	"tokobelanja-golang/model/entity"
 	"tokobelanja-golang/model/input"
+	"tokobelanja-golang/model/response"
 	"tokobelanja-golang/repository"
 )
 
 type TransactionHistoryService interface {
 	CreateTransaction(transactionInput input.InputTransaction, IDUser int) (entity.TransactionHistory, error)
-	GetMyTransaction(IDUser int) ([]entity.TransactionHistory, error)
+	GetMyTransaction(IDUser int) ([]response.TransactionHistoryResponse, error)
+	GetUserTransaction(IDUser int) ([]response.UserTransactionHistoryResponse, error)
 }
 
 type transactionHistoryService struct {
@@ -93,35 +95,78 @@ func (s *transactionHistoryService) CreateTransaction(transactionInput input.Inp
 	return transactionCreated, nil
 }
 
-func (s *transactionHistoryService) GetMyTransaction(IDUser int) ([]entity.TransactionHistory, error) {
+func (s *transactionHistoryService) GetMyTransaction(IDUser int) ([]response.TransactionHistoryResponse, error) {
 	myTransaction, err := s.transactionHistoryRepository.GetTransactionByIDUser(IDUser)
 
 	if err != nil {
-		return []entity.TransactionHistory{}, err
+		return []response.TransactionHistoryResponse{}, err
 	}
 
 	if len(myTransaction) < 1 {
-		return []entity.TransactionHistory{}, err
+		return []response.TransactionHistoryResponse{}, err
 	}
 
-	return myTransaction, nil
+	var myTransactionResponse []response.TransactionHistoryResponse
+
+	for _, item := range myTransaction {
+		productTemp, _ := s.productRepository.GetProductByID(item.ProductID)
+
+		temp := response.TransactionHistoryResponse{
+			ID:         item.ID,
+			ProductID:  item.ProductID,
+			UserID:     item.UserID,
+			Quantity:   item.Quantity,
+			TotalPrice: item.TotalPrice,
+			CreatedAt:  item.CreatedAt,
+			UpdatedAt:  item.UpdatedAt,
+			Product:    productTemp,
+		}
+		myTransactionResponse = append(myTransactionResponse, temp)
+	}
+
+	return myTransactionResponse, nil
 }
 
-func (s *transactionHistoryService) GetUserTransaction(IDUser int, levelUser string) ([]entity.TransactionHistory, error) {
+func (s *transactionHistoryService) GetUserTransaction(IDUser int) ([]response.UserTransactionHistoryResponse, error) {
 
-	if levelUser != "admin" {
-		return []entity.TransactionHistory{}, errors.New("Unauthorized User")
+	userdata, err := s.userRepository.GetByID(IDUser)
+	if userdata.ID == 0 {
+		return []response.UserTransactionHistoryResponse{}, errors.New("users not found!")
 	}
 
-	myTransaction, err := s.transactionHistoryRepository.GetTransactionByIDUser(IDUser)
+	if userdata.Role != "admin" {
+		return []response.UserTransactionHistoryResponse{}, errors.New("Unauthorized user!")
+	}
+
+	myTransaction, err := s.transactionHistoryRepository.GetAllTransaction()
 
 	if err != nil {
-		return []entity.TransactionHistory{}, err
+		return []response.UserTransactionHistoryResponse{}, err
 	}
 
 	if len(myTransaction) < 1 {
-		return []entity.TransactionHistory{}, err
+		return []response.UserTransactionHistoryResponse{}, err
 	}
 
-	return myTransaction, nil
+	var myTransactionResponse []response.UserTransactionHistoryResponse
+
+	for _, item := range myTransaction {
+		productTemp, _ := s.productRepository.GetProductByID(item.ProductID)
+		userTemp, _ := s.userRepository.GetByID(item.UserID)
+
+		temp := response.UserTransactionHistoryResponse{
+			ID:         item.ID,
+			ProductID:  item.ProductID,
+			UserID:     item.UserID,
+			Quantity:   item.Quantity,
+			TotalPrice: item.TotalPrice,
+			CreatedAt:  item.CreatedAt,
+			UpdatedAt:  item.UpdatedAt,
+			Product:    productTemp,
+			User:       userTemp,
+		}
+		myTransactionResponse = append(myTransactionResponse, temp)
+	}
+
+	return myTransactionResponse, nil
 }

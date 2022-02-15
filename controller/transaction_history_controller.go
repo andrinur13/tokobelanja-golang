@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"tokobelanja-golang/helper"
 	"tokobelanja-golang/model/input"
@@ -14,10 +13,11 @@ import (
 type transactionHistoryController struct {
 	transactionHistoryService service.TransactionHistoryService
 	userService               service.UserService
+	productService            service.ProductService
 }
 
-func NewTransactionHistoryController(transactionHistoryService service.TransactionHistoryService, userService service.UserService) *transactionHistoryController {
-	return &transactionHistoryController{transactionHistoryService, userService}
+func NewTransactionHistoryController(transactionHistoryService service.TransactionHistoryService, userService service.UserService, productService service.ProductService) *transactionHistoryController {
+	return &transactionHistoryController{transactionHistoryService, userService, productService}
 }
 
 func (h *transactionHistoryController) NewTransaction(c *gin.Context) {
@@ -41,12 +41,12 @@ func (h *transactionHistoryController) NewTransaction(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(newTransaction)
+	product, err := h.productService.GetProductByID(input.ProductID)
 
 	billResponse := response.NewTransactionBillResponse{
 		TotalPrice:   newTransaction.TotalPrice,
 		Quantity:     input.Quantity,
-		ProductTitle: "nunggu product domain",
+		ProductTitle: product.Title,
 	}
 
 	newTransactionResponse := response.NewTransactionResponse{
@@ -105,7 +105,7 @@ func (h *transactionHistoryController) GetUserTransaction(c *gin.Context) {
 		return
 	}
 
-	userdata, err := h.userService.CheckUserAdmin(currentUser)
+	transactions, err := h.transactionHistoryService.GetUserTransaction(currentUser)
 
 	if err != nil {
 		errorMessages := gin.H{
@@ -117,14 +117,8 @@ func (h *transactionHistoryController) GetUserTransaction(c *gin.Context) {
 		return
 	}
 
-	if userdata == false {
-		response := helper.APIResponse("failed", "unauthorized user")
-		c.JSON(http.StatusUnauthorized, response)
-	}
-
-	h.transactionHistoryService.GetMyTransaction(2)
-
-	response := helper.APIResponse("success", "success get user transactions")
-	c.JSON(http.StatusUnauthorized, response)
+	response := helper.APIResponse("success", transactions)
+	c.JSON(http.StatusOK, response)
+	return
 
 }

@@ -31,11 +31,13 @@ func main() {
 	userService := service.NewUserService(userRepository)
 	transactionService := service.NewTransactionHistoryService(transactionRepository, productRepository, userRepository)
 	categoriesService := service.NewCategoryService(categoriesRepository)
+	productService := service.NewProductService(productRepository)
 
 	// controller
 	userController := controller.NewUserController(userService)
-	transactionController := controller.NewTransactionHistoryController(transactionService, userService)
+	transactionController := controller.NewTransactionHistoryController(transactionService, userService, productService)
 	categoriesController := controller.NewCategoryController(categoriesService, userService)
+	productController := controller.NewProductController(productService, userService)
 
 	router := gin.Default()
 
@@ -48,11 +50,19 @@ func main() {
 	// transaction
 	router.POST("transactions", middleware.AuthMiddleware(), transactionController.NewTransaction)
 	router.POST("transactions/my-transactions", middleware.AuthMiddleware(), transactionController.GetMyTransaction)
+	router.POST("transactions/user-transactions", middleware.AuthMiddleware(), transactionController.GetUserTransaction)
 
 	// categories
 	router.POST("categories", middleware.AuthMiddleware(), categoriesController.CreateCategory)
 	router.GET("categories", middleware.AuthMiddleware(), categoriesController.GetAllCategory)
 	router.PATCH("categories/:id", middleware.AuthMiddleware(), categoriesController.UpdateCategory)
+	router.DELETE("categories/:id", middleware.AuthMiddleware(), categoriesController.DeleteCategory)
+
+	// product
+	router.POST("products", middleware.AuthMiddleware(), productController.CreateProduct)
+	router.PUT("products/:id", middleware.AuthMiddleware(), productController.UpdateProduct)
+	router.GET("products", middleware.AuthMiddleware(), productController.GetAllProduct)
+	router.DELETE("products/:id", middleware.AuthMiddleware(), productController.DeleteProduct)
 
 	router.Run()
 
